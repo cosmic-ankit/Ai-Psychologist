@@ -9,22 +9,23 @@ import Modal from './Modal';
 import Setting from './Setting';
 
 const gptModel = ['gpt-3.5-turbo', 'gpt-4'];
+
 const template = [
   {
-    title: 'Plan a trip',
-    prompt: 'I want to plan a trip to New York City.',
+    title: 'Reflecting on My Day Today',
+    prompt: 'Today, I experienced various events and emotions. Here is a reflection on my day:',
   },
   {
-    title: 'how to make a cake',
-    prompt: 'How to make a cake with chocolate and strawberries?',
+    title: 'Discussing a Recent Challenge',
+    prompt: 'Recently, I faced a significant challenge. Let me describe what happened and how it affected me:',
   },
   {
-    title: 'Business ideas',
-    prompt: 'Generate 5 business ideas for a new startup company.',
+    title: 'Expressing My Thoughts',
+    prompt: 'I have been thinking about several things lately. Here are my thoughts and feelings:',
   },
   {
-    title: 'What is recursion?',
-    prompt: 'What is recursion? show me an example in python.',
+    title: 'Gratitude and Positivity',
+    prompt: 'There are many things I am grateful for and positive about. Here is a list of things that make me feel grateful and positive:',
   },
 ];
 
@@ -107,7 +108,6 @@ Summarize the session we just had in clear and concise bullet points. Ensure the
 Please structure the response clearly, starting with the summary followed by the advice and mentorship section.
 `;
 
-
     setThinking(true);
 
     try {
@@ -131,19 +131,18 @@ Please structure the response clearly, starting with the summary followed by the
   return (
     <main className='relative flex flex-col h-screen p-1 overflow-hidden dark:bg-light-grey'>
       <div className='mx-auto my-4 tabs tabs-boxed w-fit'>
-      <a
-  onClick={() => setGpt(gptModel[0])}
-  className={`tab ${gpt === gptModel[0] ? 'tab-active' : ''}`}
-  style={{ backgroundColor: gpt === gptModel[0] ? 'hsl(213, 27%, 84%)' : '', color: 'black' }}>
-  GPT-3.5
-</a>
-<a
-  onClick={() => setGpt(gptModel[1])}
-  className={`tab ${gpt === gptModel[1] ? 'tab-active' : ''}`}
-  style={{ backgroundColor: gpt === gptModel[1] ? 'hsl(213, 27%, 84%)' : '', color: 'black' }}>
-  GPT-4
-</a>
-
+        <a
+          onClick={() => setGpt(gptModel[0])}
+          className={`tab ${gpt === gptModel[0] ? 'tab-active' : ''}`}
+          style={{ backgroundColor: gpt === gptModel[0] ? 'hsl(213, 27%, 84%)' : '', color: 'black' }}>
+          GPT-3.5
+        </a>
+        <a
+          onClick={() => setGpt(gptModel[1])}
+          className={`tab ${gpt === gptModel[1] ? 'tab-active' : ''}`}
+          style={{ backgroundColor: gpt === gptModel[1] ? 'hsl(213, 27%, 84%)' : '', color: 'black' }}>
+          GPT-4
+        </a>
       </div>
 
       <section className='flex flex-col flex-grow w-full px-4 overflow-y-scroll sm:px-10 md:px-32'>
@@ -173,30 +172,34 @@ Please structure the response clearly, starting with the summary followed by the
 
         <span ref={messagesEndRef}></span>
       </section>
-     
-     <form
-  className='flex flex-col px-10 mb-6 md:px-32 join sm:flex-row'
-  onSubmit={sendMessage}>
-  <div className='flex items-stretch justify-between w-full'>
-    <textarea
-      ref={inputRef}
-      className='w-full grow input input-bordered join-item max-h-[20rem] min-h-[3rem]'
-      value={formValue}
-      onKeyDown={handleKeyDown}
-      onChange={(e) => setFormValue(e.target.value)}
-    />
-    <button type='submit' className='join-item btn' disabled={!formValue}>
-      <MdSend size={30} />
-    </button>
-  </div>
-  <button
-    type='button'
-    onClick={endSession}
-    className='btn btn-blue btn-outline mt-2 md:mt-0'>
-    End Session
-  </button>
-</form>
 
+      <form className='flex flex-col px-10 mb-6 md:px-32 join sm:flex-row' onSubmit={sendMessage}>
+        <div className='flex items-stretch justify-between w-full'>
+          
+        <textarea
+  ref={inputRef}
+  className='w-full grow input input-bordered join-item max-h-[20rem] min-h-[3rem]'
+  value={formValue}
+  onKeyDown={handleKeyDown}
+  onChange={(e) => {
+    setFormValue(e.target.value);
+    handleInput(e);
+  }}
+/>
+
+
+
+          <button type='submit' className='join-item btn bg-[hsl(213,27%,84%)] hover:bg-[hsl(213,27%,74%)]' disabled={!formValue}>
+            <MdSend size={30} />
+          </button>
+        </div>
+        <button
+          type='button'
+          onClick={endSession}
+          className='btn mt-2 md:mt-0 md:ml-2 hover:bg-[hsl(213,27%,74%)]  bg-[hsl(210,4%,61%)  ]'>
+          End Session
+        </button>
+      </form>
 
       <Modal title='Setting' modalOpen={modalOpen} setModalOpen={setModalOpen}>
         <Setting modalOpen={modalOpen} setModalOpen={setModalOpen} />

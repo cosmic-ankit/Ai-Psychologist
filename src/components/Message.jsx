@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import { MdComputer, MdPerson } from 'react-icons/md';
 import moment from 'moment';
-import Image from './Image';
 import Markdown from './Markdown';
 
 /**
@@ -10,7 +9,7 @@ import Markdown from './Markdown';
  * @param {Object} props - The properties for the component.
  */
 const Message = (props) => {
-  const { id, createdAt, text, ai = false, selected } = props.message;
+  const { id, createdAt, text, ai = false } = props.message;
 
   return (
     <div
@@ -22,7 +21,10 @@ const Message = (props) => {
         className={`w-screen overflow-hidden chat ${
           ai ? 'chat-start' : 'chat-end'
         }`}>
-        <div className='chat-bubble text-neutral-content'>
+        <div
+          className={`chat-bubble text-neutral-content ${
+            ai ? 'bg-blue-100 text-black' : 'bg-gray-100 text-black'
+          }`}>
           <Markdown markdownText={text} />
           <div className={`${ai ? 'text-left' : 'text-right'} text-xs`}>
             {moment(createdAt).calendar()}
@@ -43,8 +45,6 @@ const Message = (props) => {
   );
 };
 
-  
-
 export default Message;
 
 Message.propTypes = {
@@ -53,6 +53,5 @@ Message.propTypes = {
     createdAt: PropTypes.number.isRequired,
     text: PropTypes.string,
     ai: PropTypes.bool,
-    selected: PropTypes.string,
   }).isRequired,
 };
