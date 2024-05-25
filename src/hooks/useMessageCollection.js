@@ -5,6 +5,9 @@ import { useState, useEffect } from 'react';
  *
  * @returns {Object} An object containing the `messages` array, the `addMessage` function, the `clearMessages` function, and the `loadMessage` function.
  */
+
+
+
 const useMessageCollection = () => {
   const [messages, setMessages] = useState([]);
 
@@ -21,18 +24,10 @@ const useMessageCollection = () => {
     }
   }, [messages]);
 
-  /**
-   * A function for adding a new message to the collection.
-   *
-   * @param {Object} message - The message to add to the collection.
-   */
   const addMessage = (message) => {
     setMessages((prev) => [...prev, message]);
   };
 
-  /**
-   * A function for clearing all messages in the collection and resetting to the initial message.
-   */
   const clearChat = () => {
     localStorage.setItem('messages', JSON.stringify([]));
     setMessages([]);

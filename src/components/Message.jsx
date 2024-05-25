@@ -18,21 +18,17 @@ const Message = (props) => {
       className={`flex items-end my-2 gap-2 ${
         ai ? 'flex-row-reverse justify-end' : 'flex-row justify-end'
       }`}>
-      {selected === 'DALL·E' && ai ? (
-        <Image url={text} />
-      ) : (
-        <div
-          className={` w-screen overflow-hidden chat ${
-            ai ? 'chat-start' : 'chat-end'
-          }`}>
-          <div className='chat-bubble text-neutral-content'>
-            <Markdown markdownText={text} />
-            <div className={`${ai ? 'text-left' : 'text-right'} text-xs`}>
-              {moment(createdAt).calendar()}
-            </div>
+      <div
+        className={`w-screen overflow-hidden chat ${
+          ai ? 'chat-start' : 'chat-end'
+        }`}>
+        <div className='chat-bubble text-neutral-content'>
+          <Markdown markdownText={text} />
+          <div className={`${ai ? 'text-left' : 'text-right'} text-xs`}>
+            {moment(createdAt).calendar()}
           </div>
         </div>
-      )}
+      </div>
 
       <div className='avatar'>
         <div className='w-8 border rounded-full border-slate-400'>
@@ -46,6 +42,8 @@ const Message = (props) => {
     </div>
   );
 };
+
+  
 
 export default Message;
 

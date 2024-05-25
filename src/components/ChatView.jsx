@@ -5,11 +5,9 @@ import Thinking from './Thinking';
 import { MdSend } from 'react-icons/md';
 import { replaceProfanities } from 'no-profanity';
 import { davinci } from '../utils/davinci';
-import { dalle } from '../utils/dalle';
 import Modal from './Modal';
 import Setting from './Setting';
 
-const options = ['ChatGPT', 'DALL·E'];
 const gptModel = ['gpt-3.5-turbo', 'gpt-4'];
 const template = [
   {
@@ -30,50 +28,31 @@ const template = [
   },
 ];
 
-/**
- * A chat view component that displays a list of messages and a form for sending new messages.
- */
 const ChatView = () => {
   const messagesEndRef = useRef();
   const inputRef = useRef();
   const [formValue, setFormValue] = useState('');
   const [thinking, setThinking] = useState(false);
-  const [selected, setSelected] = useState(options[0]);
   const [gpt, setGpt] = useState(gptModel[0]);
   const [messages, addMessage] = useContext(ChatContext);
   const [modalOpen, setModalOpen] = useState(false);
 
-  /**
-   * Scrolls the chat area to the bottom.
-   */
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  /**
-   * Adds a new message to the chat.
-   *
-   * @param {string} newValue - The text of the new message.
-   * @param {boolean} [ai=false] - Whether the message was sent by an AI or the user.
-   */
-  const updateMessage = (newValue, ai = false, selected) => {
+  const updateMessage = (newValue, ai = false) => {
     const id = Date.now() + Math.floor(Math.random() * 1000000);
     const newMsg = {
       id: id,
       createdAt: Date.now(),
       text: newValue,
       ai: ai,
-      selected: `${selected}`,
     };
 
     addMessage(newMsg);
   };
 
-  /**
-   * Sends our prompt to our API and get response to our request from openai.
-   *
-   * @param {Event} e - The submit event of the form.
-   */
   const sendMessage = async (e) => {
     e.preventDefault();
 
@@ -84,27 +63,17 @@ const ChatView = () => {
     }
 
     const cleanPrompt = replaceProfanities(formValue);
-
     const newMsg = cleanPrompt;
-    const aiModel = selected;
     const gptVersion = gpt;
 
     setThinking(true);
     setFormValue('');
-    updateMessage(newMsg, false, aiModel);
+    updateMessage(newMsg, false);
     console.log(gptVersion);
 
-    console.log(selected);
     try {
-      if (aiModel === options[0]) {
-        const LLMresponse = await davinci(cleanPrompt, key, gptVersion);
-        //const data = response.data.choices[0].message.content;
-        LLMresponse && updateMessage(LLMresponse, true, aiModel);
-      } else {
-        const response = await dalle(cleanPrompt, key);
-        const data = response.data.data[0].url;
-        data && updateMessage(data, true, aiModel);
-      }
+      const LLMresponse = await davinci(cleanPrompt, key, gptVersion);
+      LLMresponse && updateMessage(LLMresponse, true);
     } catch (err) {
       window.alert(`Error: ${err} please try again later`);
     }
@@ -114,21 +83,47 @@ const ChatView = () => {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      // 👇 Get input value
       sendMessage(e);
     }
   };
 
-  /**
-   * Scrolls the chat area to the bottom when the messages array is updated.
-   */
+  const endSession = async () => {
+    const key = window.localStorage.getItem('api-key');
+    if (!key) {
+      setModalOpen(true);
+      return;
+    }
+
+    const gptVersion = gpt;
+    const summaryPrompt = `
+Summarize the session we just had in clear and concise bullet points. Ensure the summary captures the main topics discussed, key insights, and important details. Additionally, based on the conversation, provide actionable advice and mentorship in bullet points, including:
+
+1. Highlights of the discussion.
+2. Key takeaways or conclusions.
+3. Suggested next steps or actions.
+4. Tips or best practices relevant to the topics discussed.
+5. Any resources or tools that might be helpful.
+
+Please structure the response clearly, starting with the summary followed by the advice and mentorship section.
+`;
+
+
+    setThinking(true);
+
+    try {
+      const LLMresponse = await davinci(summaryPrompt, key, gptVersion);
+      LLMresponse && updateMessage(LLMresponse, true);
+    } catch (err) {
+      window.alert(`Error: ${err} please try again later`);
+    }
+
+    setThinking(false);
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages, thinking]);
 
-  /**
-   * Focuses the TextArea input to when the component is first rendered.
-   */
   useEffect(() => {
     inputRef.current.focus();
   }, []);
@@ -136,16 +131,19 @@ const ChatView = () => {
   return (
     <main className='relative flex flex-col h-screen p-1 overflow-hidden dark:bg-light-grey'>
       <div className='mx-auto my-4 tabs tabs-boxed w-fit'>
-        <a
-          onClick={() => setGpt(gptModel[0])}
-          className={`${gpt == gptModel[0] && 'tab-active'} tab`}>
-          GPT-3.5
-        </a>
-        <a
-          onClick={() => setGpt(gptModel[1])}
-          className={`${gpt == gptModel[1] && 'tab-active'} tab`}>
-          GPT-4
-        </a>
+      <a
+  onClick={() => setGpt(gptModel[0])}
+  className={`tab ${gpt === gptModel[0] ? 'tab-active' : ''}`}
+  style={{ backgroundColor: gpt === gptModel[0] ? 'hsl(213, 27%, 84%)' : '', color: 'black' }}>
+  GPT-3.5
+</a>
+<a
+  onClick={() => setGpt(gptModel[1])}
+  className={`tab ${gpt === gptModel[1] ? 'tab-active' : ''}`}
+  style={{ backgroundColor: gpt === gptModel[1] ? 'hsl(213, 27%, 84%)' : '', color: 'black' }}>
+  GPT-4
+</a>
+
       </div>
 
       <section className='flex flex-col flex-grow w-full px-4 overflow-y-scroll sm:px-10 md:px-32'>
@@ -175,29 +173,31 @@ const ChatView = () => {
 
         <span ref={messagesEndRef}></span>
       </section>
-      <form
-        className='flex flex-col px-10 mb-2 md:px-32 join sm:flex-row'
-        onSubmit={sendMessage}>
-        <select
-          value={selected}
-          onChange={(e) => setSelected(e.target.value)}
-          className='w-full sm:w-40 select select-bordered join-item'>
-          <option>{options[0]}</option>
-          <option>{options[1]}</option>
-        </select>
-        <div className='flex items-stretch justify-between w-full'>
-          <textarea
-            ref={inputRef}
-            className='w-full grow input input-bordered join-item max-h-[20rem] min-h-[3rem]'
-            value={formValue}
-            onKeyDown={handleKeyDown}
-            onChange={(e) => setFormValue(e.target.value)}
-          />
-          <button type='submit' className='join-item btn' disabled={!formValue}>
-            <MdSend size={30} />
-          </button>
-        </div>
-      </form>
+     
+     <form
+  className='flex flex-col px-10 mb-6 md:px-32 join sm:flex-row'
+  onSubmit={sendMessage}>
+  <div className='flex items-stretch justify-between w-full'>
+    <textarea
+      ref={inputRef}
+      className='w-full grow input input-bordered join-item max-h-[20rem] min-h-[3rem]'
+      value={formValue}
+      onKeyDown={handleKeyDown}
+      onChange={(e) => setFormValue(e.target.value)}
+    />
+    <button type='submit' className='join-item btn' disabled={!formValue}>
+      <MdSend size={30} />
+    </button>
+  </div>
+  <button
+    type='button'
+    onClick={endSession}
+    className='btn btn-blue btn-outline mt-2 md:mt-0'>
+    End Session
+  </button>
+</form>
+
+
       <Modal title='Setting' modalOpen={modalOpen} setModalOpen={setModalOpen}>
         <Setting modalOpen={modalOpen} setModalOpen={setModalOpen} />
       </Modal>
